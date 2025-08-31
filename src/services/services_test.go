@@ -75,7 +75,7 @@ func TestSessionService(t *testing.T) {
 	ctx := context.Background()
 
 	// Create a user first
-	user, err := userService.CreateUser(ctx, &pb.UserCreate{
+	_, err := userService.CreateUser(ctx, &pb.UserCreate{
 		Username: "testuser",
 		Email:    "test@example.com",
 		Password: "password123",
