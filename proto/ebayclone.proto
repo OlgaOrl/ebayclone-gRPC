@@ -1,0 +1,234 @@
+syntax = "proto3";
+
+package ebayclone;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "ebayclone-grpc/proto";
+
+// Common types
+message Error {
+  string error = 1;
+  string code = 2;
+  map<string, string> details = 3;
+}
+
+message Success {
+  string message = 1;
+}
+
+// Address message for shipping
+message Address {
+  string street = 1;
+  string city = 2;
+  string state = 3;
+  string zip_code = 4;
+  string country = 5;
+}
+
+// User related messages
+message User {
+  int32 id = 1;
+  string username = 2;
+  string email = 3;
+}
+
+message UserCreate {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message UserLogin {
+  string email = 1;
+  string password = 2;
+}
+
+message UserUpdate {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message LoginResponse {
+  string token = 1;
+}
+
+// Listing related messages
+message Listing {
+  int32 id = 1;
+  string title = 2;
+  string description = 3;
+  double price = 4;
+  string category = 5;
+  string condition = 6;
+  string location = 7;
+  repeated string images = 8;
+  int32 user_id = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+}
+
+message ListingCreate {
+  string title = 1;
+  string description = 2;
+  double price = 3;
+  string category = 4;
+  string condition = 5;
+  string location = 6;
+  repeated bytes images = 7;
+}
+
+message ListingUpdate {
+  string title = 1;
+  string description = 2;
+  double price = 3;
+  string category = 4;
+  string condition = 5;
+  string location = 6;
+}
+
+message ListingsRequest {
+  string search = 1;
+  double price_min = 2;
+  double price_max = 3;
+}
+
+message ListingsResponse {
+  repeated Listing listings = 1;
+}
+
+// Order related messages
+message Order {
+  int32 id = 1;
+  int32 user_id = 2;
+  int32 listing_id = 3;
+  int32 quantity = 4;
+  double total_price = 5;
+  string status = 6;
+  Address shipping_address = 7;
+  string buyer_notes = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+  google.protobuf.Timestamp cancelled_at = 11;
+  string cancel_reason = 12;
+}
+
+message OrderCreate {
+  int32 listing_id = 1;
+  int32 quantity = 2;
+  Address shipping_address = 3;
+  string buyer_notes = 4;
+}
+
+message OrderUpdate {
+  int32 user_id = 1;
+  int32 listing_id = 2;
+  int32 quantity = 3;
+  double total_price = 4;
+}
+
+message OrdersRequest {
+  int32 user_id = 1;
+  string status = 2;
+  int32 page = 3;
+  int32 limit = 4;
+}
+
+message OrdersResponse {
+  repeated Order orders = 1;
+  Pagination pagination = 2;
+}
+
+message Pagination {
+  int32 total = 1;
+  int32 pages = 2;
+}
+
+message CancelOrderRequest {
+  int32 id = 1;
+  string cancel_reason = 2;
+}
+
+message CancelOrderResponse {
+  string message = 1;
+  Order order = 2;
+}
+
+message UpdateOrderStatusRequest {
+  int32 id = 1;
+  string status = 2;
+}
+
+// Request/Response messages for individual operations
+message GetUserRequest {
+  int32 id = 1;
+}
+
+message UpdateUserRequest {
+  int32 id = 1;
+  UserUpdate user = 2;
+}
+
+message DeleteUserRequest {
+  int32 id = 1;
+}
+
+message GetListingRequest {
+  int32 id = 1;
+}
+
+message UpdateListingRequest {
+  int32 id = 1;
+  ListingUpdate listing = 2;
+}
+
+message DeleteListingRequest {
+  int32 id = 1;
+}
+
+message GetOrderRequest {
+  int32 id = 1;
+}
+
+message UpdateOrderRequest {
+  int32 id = 1;
+  OrderUpdate order = 2;
+}
+
+message DeleteOrderRequest {
+  int32 id = 1;
+}
+
+// Service definitions
+service UserService {
+  rpc CreateUser(UserCreate) returns (User);
+  rpc GetUser(GetUserRequest) returns (User);
+  rpc UpdateUser(UpdateUserRequest) returns (User);
+  rpc ReplaceUser(UpdateUserRequest) returns (User);
+  rpc DeleteUser(DeleteUserRequest) returns (google.protobuf.Empty);
+}
+
+service SessionService {
+  rpc Login(UserLogin) returns (LoginResponse);
+  rpc Logout(google.protobuf.Empty) returns (google.protobuf.Empty);
+}
+
+service ListingService {
+  rpc GetListings(ListingsRequest) returns (ListingsResponse);
+  rpc CreateListing(ListingCreate) returns (Listing);
+  rpc GetListing(GetListingRequest) returns (Listing);
+  rpc UpdateListing(UpdateListingRequest) returns (Listing);
+  rpc DeleteListing(DeleteListingRequest) returns (Success);
+}
+
+service OrderService {
+  rpc GetOrders(OrdersRequest) returns (OrdersResponse);
+  rpc CreateOrder(OrderCreate) returns (Order);
+  rpc GetOrder(GetOrderRequest) returns (Order);
+  rpc UpdateOrder(UpdateOrderRequest) returns (Order);
+  rpc DeleteOrder(DeleteOrderRequest) returns (Success);
+  rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse);
+  rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (Order);
+}

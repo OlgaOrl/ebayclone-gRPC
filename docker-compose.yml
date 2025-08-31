@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  ebayclone-grpc:
+    build: .
+    ports:
+      - "50051:50051"
+    environment:
+      - PORT=50051
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "50051"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
